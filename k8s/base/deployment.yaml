@@ -19,6 +19,16 @@ spec:
         prometheus.io/path: "/metrics"
         prometheus.io/port: "8000"
     spec:
+      initContainers:
+        - name: migrate
+          image: 123456789012.dkr.ecr.ap-south-1.amazonaws.com/royalwheels:latest
+          imagePullPolicy: Always
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          envFrom:
+            - configMapRef:
+                name: royalwheels-config
+            - secretRef:
+                name: royalwheels-secrets
       containers:
         - name: web
           image: 123456789012.dkr.ecr.ap-south-1.amazonaws.com/royalwheels:latest

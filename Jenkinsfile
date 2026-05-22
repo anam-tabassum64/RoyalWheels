@@ -52,7 +52,7 @@ pipeline {
         withCredentials([string(credentialsId: 'aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
           sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER}"
           sh 'kubectl apply -k k8s/base'
-          sh "kubectl -n royalwheels set image deployment/royalwheels-web web=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          sh "kubectl -n royalwheels set image deployment/royalwheels-web web=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG} migrate=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
           sh 'kubectl -n royalwheels rollout status deployment/royalwheels-web --timeout=180s'
         }
       }
