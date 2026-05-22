@@ -68,6 +68,7 @@ class OwnerProfitTests(TestCase):
     ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"],
     DEBUG=True,
     SECURE_SSL_REDIRECT=False,
+    OTP_DEV_FALLBACK=True,
 )
 class OtpFlowTests(TestCase):
     def test_email_otp_send_and_verify(self):
