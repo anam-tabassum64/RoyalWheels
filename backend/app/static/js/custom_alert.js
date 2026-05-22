@@ -92,13 +92,13 @@
     if (isError) icon = '⚠️';
     if (isSuccess) icon = '🎉';
 
-    overlay.innerHTML = \`
+    overlay.innerHTML = `
       <div class="custom-alert-box">
-        <div class="custom-alert-icon">\${icon}</div>
-        <div class="custom-alert-message">\${message}</div>
+        <div class="custom-alert-icon">${icon}</div>
+        <div class="custom-alert-message">${message}</div>
         <button class="custom-alert-btn">Got it</button>
       </div>
-    \`;
+    `;
 
     document.body.appendChild(overlay);
 
