@@ -7,5 +7,5 @@ data:
   DJANGO_DEBUG: "False"
   DJANGO_ALLOWED_HOSTS: "*"
   DJANGO_CSRF_TRUSTED_ORIGINS: "https://royalwheels.example.com"
-  DJANGO_SECURE_SSL_REDIRECT: "true"
+  DJANGO_SECURE_SSL_REDIRECT: "false"
   RAZORPAY_CURRENCY: "INR"
