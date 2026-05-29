@@ -1,6 +1,10 @@
 # RoyalWheels - Cloud-Native Vehicle Rental Platform 🚗🏍️
 
 <p align="center">
+  <img src="./assets/royalwheels-hero.svg" alt="RoyalWheels Hero Banner" width="100%" />
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Django-5.x-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django Badge" />
   <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Badge" />
   <img src="https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Badge" />
@@ -13,6 +17,13 @@
   <img src="https://img.shields.io/badge/Terraform-IaC-7B42BC?style=flat-square&logo=terraform&logoColor=white" alt="Terraform Badge" />
   <img src="https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=flat-square&logo=prometheus&logoColor=white" alt="Prometheus Badge" />
   <img src="https://img.shields.io/badge/Grafana-Observability-F46800?style=flat-square&logo=grafana&logoColor=white" alt="Grafana Badge" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/stars/anam-tabassum64/RoyalWheels?style=flat-square&logo=github&label=Stars" alt="GitHub Stars" />
+  <img src="https://img.shields.io/github/forks/anam-tabassum64/RoyalWheels?style=flat-square&logo=github&label=Forks" alt="GitHub Forks" />
+  <img src="https://img.shields.io/github/issues/anam-tabassum64/RoyalWheels?style=flat-square&logo=github&label=Open%20Issues" alt="GitHub Issues" />
+  <img src="https://img.shields.io/github/last-commit/anam-tabassum64/RoyalWheels?style=flat-square&logo=github&label=Last%20Commit" alt="Last Commit" />
 </p>
 
 <p align="center">

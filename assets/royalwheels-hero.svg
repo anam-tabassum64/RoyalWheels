@@ -1,0 +1,73 @@
+<svg width="1600" height="420" viewBox="0 0 1600 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">RoyalWheels Hero Banner</title>
+  <desc id="desc">A modern blue and gold hero banner for the RoyalWheels vehicle rental platform.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111F"/>
+      <stop offset="0.52" stop-color="#0E1B31"/>
+      <stop offset="1" stop-color="#142A4A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="420" y1="60" x2="1180" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5C96A"/>
+      <stop offset="1" stop-color="#E38B2D"/>
+    </linearGradient>
+    <linearGradient id="car" x1="520" y1="190" x2="1120" y2="310" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#B8C7DD"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1600" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="420" rx="34" fill="url(#bg)"/>
+  <circle cx="1270" cy="72" r="140" fill="#2C5D9E" fill-opacity="0.18"/>
+  <circle cx="300" cy="68" r="100" fill="#F5C96A" fill-opacity="0.12"/>
+  <circle cx="1380" cy="320" r="180" fill="#F5C96A" fill-opacity="0.08"/>
+  <path d="M0 314C180 274 304 284 456 310C590 334 724 346 842 330C985 310 1104 248 1278 240C1406 234 1514 254 1600 280V420H0V314Z" fill="#09111D"/>
+  <path d="M92 302C190 270 282 260 392 272" stroke="#F5C96A" stroke-opacity="0.34" stroke-width="4" stroke-linecap="round"/>
+  <path d="M116 326C224 292 320 286 454 302" stroke="#8FB6E8" stroke-opacity="0.2" stroke-width="3" stroke-linecap="round"/>
+
+  <g filter="url(#shadow)">
+    <rect x="95" y="78" width="470" height="264" rx="28" fill="#0B1525" fill-opacity="0.72" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <rect x="95" y="78" width="470" height="264" rx="28" fill="url(#accent)" fill-opacity="0.05"/>
+  </g>
+
+  <text x="138" y="156" fill="#F8FAFC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="52" font-weight="800" letter-spacing="0.5">
+    RoyalWheels
+  </text>
+  <text x="138" y="198" fill="#F5C96A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="3">
+    CLOUD-NATIVE VEHICLE RENTAL PLATFORM
+  </text>
+  <text x="138" y="242" fill="#D6E3F5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="400">
+    Rent cars and bikes online with partner dashboards,
+  </text>
+  <text x="138" y="268" fill="#D6E3F5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="400">
+    cloud deployment, and production-grade monitoring.
+  </text>
+
+  <g>
+    <rect x="138" y="292" width="112" height="34" rx="17" fill="#F5C96A" fill-opacity="0.18" stroke="#F5C96A" stroke-opacity="0.5"/>
+    <text x="164" y="315" fill="#FCE7B2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Django</text>
+    <rect x="262" y="292" width="112" height="34" rx="17" fill="#8FB6E8" fill-opacity="0.16" stroke="#8FB6E8" stroke-opacity="0.5"/>
+    <text x="289" y="315" fill="#D7E6FB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">AWS EKS</text>
+    <rect x="386" y="292" width="112" height="34" rx="17" fill="#9CE0C2" fill-opacity="0.14" stroke="#9CE0C2" stroke-opacity="0.45"/>
+    <text x="410" y="315" fill="#D7FAE7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Grafana</text>
+  </g>
+
+  <g transform="translate(710 110)" filter="url(#shadow)">
+    <path d="M92 120C105 84 137 68 176 68H342C381 68 414 85 431 117L459 170H481C496 170 508 182 508 197V220H36V189C36 176 45 165 58 162L92 120Z" fill="url(#car)"/>
+    <path d="M136 92H295C324 92 350 106 367 130L382 151H98L108 133C120 114 127 101 136 92Z" fill="#1B2A44" fill-opacity="0.95"/>
+    <path d="M122 100H285C308 100 329 110 343 127L354 141H108L114 130C122 113 129 105 122 100Z" fill="#7AB5F7" fill-opacity="0.24"/>
+    <circle cx="151" cy="228" r="38" fill="#0C1524"/>
+    <circle cx="151" cy="228" r="22" fill="#CBD7EA"/>
+    <circle cx="383" cy="228" r="38" fill="#0C1524"/>
+    <circle cx="383" cy="228" r="22" fill="#CBD7EA"/>
+    <rect x="72" y="178" width="52" height="12" rx="6" fill="#F5C96A"/>
+    <rect x="432" y="178" width="52" height="12" rx="6" fill="#F5C96A"/>
+  </g>
+
+  <path d="M1120 76C1180 24 1262 6 1330 22" stroke="#F5C96A" stroke-opacity="0.24" stroke-width="5" stroke-linecap="round"/>
+  <path d="M1166 112C1220 72 1282 60 1344 72" stroke="#8FB6E8" stroke-opacity="0.22" stroke-width="4" stroke-linecap="round"/>
+  <path d="M1218 146C1264 120 1312 116 1360 126" stroke="#9CE0C2" stroke-opacity="0.18" stroke-width="4" stroke-linecap="round"/>
+</svg>
