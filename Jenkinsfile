@@ -6,22 +6,6 @@ def runPlatformCommand(String unixCommand, String windowsCommand) {
   }
 }
 
-def runWindowsPythonCommand(String commandArgs) {
-  bat """
-    @echo off
-    setlocal EnableExtensions
-    set "PY_CMD="
-    where py >nul 2>nul && set "PY_CMD=py -3"
-    if not defined PY_CMD where python3 >nul 2>nul && set "PY_CMD=python3"
-    if not defined PY_CMD where python >nul 2>nul && set "PY_CMD=python"
-    if not defined PY_CMD (
-      echo No Python launcher found. Install Python or add it to PATH.
-      exit /b 1
-    )
-    %PY_CMD% ${commandArgs}
-  """
-}
-
 def requireWindowsTool(String toolName) {
   bat """
     @echo off
@@ -62,10 +46,10 @@ pipeline {
             sh 'aws --version'
             sh 'kubectl version --client --short'
           } else {
-            runWindowsPythonCommand('--version')
             requireWindowsTool('docker')
             requireWindowsTool('aws')
             requireWindowsTool('kubectl')
+            bat '@echo off && docker version'
           }
 
           if (!params.AWS_ACCOUNT_ID?.trim()) {
@@ -82,8 +66,10 @@ pipeline {
             sh 'python3 -m pip install --upgrade pip'
             sh 'python3 -m pip install -r backend/requirements.txt'
           } else {
-            runWindowsPythonCommand('-m pip install --upgrade pip')
-            runWindowsPythonCommand('-m pip install -r backend\\requirements.txt')
+            bat """
+              @echo off
+              docker run --rm -v "%CD%:/code" -w /code python:3.14-slim sh -lc "python -m pip install --upgrade pip && python -m pip install -r backend/requirements.txt"
+            """
           }
         }
       }
@@ -95,7 +81,10 @@ pipeline {
           if (isUnix()) {
             sh 'python3 backend/manage.py test --failfast'
           } else {
-            runWindowsPythonCommand('backend\\manage.py test --failfast')
+            bat """
+              @echo off
+              docker run --rm -v "%CD%:/code" -w /code python:3.14-slim sh -lc "python backend/manage.py test --failfast"
+            """
           }
         }
       }
