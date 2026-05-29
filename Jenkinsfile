@@ -6,6 +6,22 @@ def runPlatformCommand(String unixCommand, String windowsCommand) {
   }
 }
 
+def runWindowsPythonCommand(String commandArgs) {
+  bat """
+    @echo off
+    setlocal
+    set "PY_CMD="
+    where py >nul 2>nul && set "PY_CMD=py -3"
+    if not defined PY_CMD where python3 >nul 2>nul && set "PY_CMD=python3"
+    if not defined PY_CMD where python >nul 2>nul && set "PY_CMD=python"
+    if not defined PY_CMD (
+      echo No Python launcher found. Install Python or add it to PATH.
+      exit /b 1
+    )
+    %PY_CMD% ${commandArgs}
+  """
+}
+
 pipeline {
   agent any
 
@@ -26,14 +42,13 @@ pipeline {
     stage('Install dependencies') {
       steps {
         script {
-          runPlatformCommand(
-            'python3 -m pip install --upgrade pip',
-            'python -m pip install --upgrade pip'
-          )
-          runPlatformCommand(
-            'python3 -m pip install -r backend/requirements.txt',
-            'python -m pip install -r backend\\requirements.txt'
-          )
+          if (isUnix()) {
+            sh 'python3 -m pip install --upgrade pip'
+            sh 'python3 -m pip install -r backend/requirements.txt'
+          } else {
+            runWindowsPythonCommand('-m pip install --upgrade pip')
+            runWindowsPythonCommand('-m pip install -r backend\\requirements.txt')
+          }
         }
       }
     }
@@ -41,10 +56,11 @@ pipeline {
     stage('Run tests') {
       steps {
         script {
-          runPlatformCommand(
-            'python3 backend/manage.py test --failfast',
-            'python backend\\manage.py test --failfast'
-          )
+          if (isUnix()) {
+            sh 'python3 backend/manage.py test --failfast'
+          } else {
+            runWindowsPythonCommand('backend\\manage.py test --failfast')
+          }
         }
       }
     }
