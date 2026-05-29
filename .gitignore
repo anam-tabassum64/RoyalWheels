@@ -12,3 +12,9 @@ __pycache__/
 .idea/
 .vscode/
 *.log
+
+# Terraform local files
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.out

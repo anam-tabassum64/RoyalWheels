@@ -1,0 +1,10 @@
+aws_region = "ap-south-1"
+cluster_name = "royalwheels-eks"
+ecr_repository_name = "royalwheels-web"
+db_name = "royalwheels"
+db_user = "royaladmin"
+db_password = "KFwsn8)khyfR&Yfs+4Y_p1hm"
+node_instance_type = "t3.micro"
+desired_capacity = 3
+max_capacity = 3
+min_capacity = 1

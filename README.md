@@ -15,10 +15,30 @@ This project is fully containerized and includes a comprehensive DevOps scaffold
 - **Kubernetes**: Standard manifests in `k8s/` for Deployments, Services, Ingress, and HPAs.
 - **Terraform**: AWS infrastructure as code in `terraform/` (EKS, RDS, VPC, ECR).
 - **Jenkins**: CI/CD pipeline defined in `Jenkinsfile`.
-- **Observability**: Prometheus metrics endpoint (`/metrics`), `/healthz/` endpoint, and Grafana dashboards (`grafana/dashboards/royalwheels-overview.json`).
-- **Render**: Included `render.yaml` blueprint for one-click PaaS deployment.
+- **Observability**: Prometheus metrics endpoint (`/metrics`), `/healthz/` endpoint, and Grafana dashboards available via Kubernetes deployment.
 
-See `docs-devops.md` for deep-dive setup and deployment instructions for AWS and Kubernetes.
+### AWS deployment with Terraform + EKS
+- `terraform/` now includes EKS, VPC, RDS, and ECR infrastructure.
+- `k8s/base/` contains the RoyalWheels Kubernetes deployment manifest and service definitions.
+- `k8s/monitoring/` contains Prometheus and Grafana manifests for cluster monitoring.
+- `Jenkinsfile` builds the Docker image, pushes it to ECR, and deploys the cluster.
+
+Use these files to deploy in your AWS account:
+
+```bash
+cd terraform
+terraform init
+terraform apply -var-file=terraform.tfvars
+```
+
+Then configure your Kubernetes context and deploy the manifests:
+
+```bash
+aws eks update-kubeconfig --region ap-south-1 --name royalwheels-eks
+kubectl apply -k k8s/base
+kubectl apply -f k8s/monitoring/prometheus.yaml
+kubectl apply -f k8s/monitoring/grafana.yaml
+```
 
 ## Running Locally
 

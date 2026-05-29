@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: royalwheels
+  namespace: royalwheels
+  labels:
+    app: royalwheels
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: royalwheels
+  template:
+    metadata:
+      labels:
+        app: royalwheels
+    spec:
+      containers:
+        - name: royalwheels
+          image: "148274106014.dkr.ecr.ap-south-1.amazonaws.com/royalwheels-web:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: royalwheels-config
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: royalwheels-secrets
+                  key: DJANGO_SECRET_KEY
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: royalwheels-secrets
+                  key: DATABASE_URL
+            - name: RAZORPAY_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: royalwheels-secrets
+                  key: RAZORPAY_KEY_ID
+            - name: RAZORPAY_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: royalwheels-secrets
+                  key: RAZORPAY_KEY_SECRET
+            - name: EMAIL_HOST_USER
+              valueFrom:
+                secretKeyRef:
+                  name: royalwheels-secrets
+                  key: EMAIL_HOST_USER
+            - name: EMAIL_HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: royalwheels-secrets
+                  key: EMAIL_HOST_PASSWORD
+          livenessProbe:
+            httpGet:
+              path: /healthz/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3

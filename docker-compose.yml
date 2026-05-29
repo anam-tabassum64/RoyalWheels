@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/code
+      - static_volume:/code/staticfiles
+      - media_volume:/code/media
+    environment:
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0"
+      DATABASE_URL: "sqlite:////code/db.sqlite3"
+      DJANGO_SECRET_KEY: "dev-secret"
+    depends_on: []
+
+volumes:
+  static_volume:
+  media_volume:

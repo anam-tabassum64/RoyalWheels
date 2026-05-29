@@ -1,0 +1,11 @@
+aws_region = "ap-south-1"
+cluster_name = "royalwheels-eks"
+ecr_repository_name = "royalwheels-web"
+db_name = "royalwheels"
+db_user = "royaladmin"
+# Replace with a strong password before applying
+# db_password = "yourSecurePassword"
+node_instance_type = "t3.micro"
+desired_capacity = 1
+max_capacity = 2
+min_capacity = 1
