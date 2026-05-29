@@ -63,12 +63,15 @@ pipeline {
       steps {
         script {
           if (isUnix()) {
-            sh 'python3 -m pip install --upgrade pip'
-            sh 'python3 -m pip install -r backend/requirements.txt'
+            sh '''
+              rm -rf .deps
+              docker run --rm -v "$PWD:/code" -w /code python:3.14-slim sh -lc "python -m pip install --upgrade pip && python -m pip install --target /code/.deps -r backend/requirements.txt"
+            '''
           } else {
             bat """
               @echo off
-              docker run --rm -v "%CD%:/code" -w /code python:3.14-slim sh -lc "python -m pip install --upgrade pip && python -m pip install -r backend/requirements.txt"
+              if exist .deps rmdir /s /q .deps
+              docker run --rm -v "%CD%:/code" -w /code python:3.14-slim sh -lc "python -m pip install --upgrade pip && python -m pip install --target /code/.deps -r backend/requirements.txt"
             """
           }
         }
@@ -79,11 +82,11 @@ pipeline {
       steps {
         script {
           if (isUnix()) {
-            sh 'python3 backend/manage.py test --failfast'
+            sh 'PYTHONPATH="$PWD/.deps" python3 backend/manage.py test --failfast'
           } else {
             bat """
               @echo off
-              docker run --rm -v "%CD%:/code" -w /code python:3.14-slim sh -lc "python backend/manage.py test --failfast"
+              docker run --rm -v "%CD%:/code" -w /code -e PYTHONPATH=/code/.deps python:3.14-slim sh -lc "python backend/manage.py test --failfast"
             """
           }
         }
