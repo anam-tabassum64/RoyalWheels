@@ -22,6 +22,7 @@ pipeline {
 
   parameters {
     string(name: 'AWS_ACCOUNT_ID', defaultValue: '', description: 'AWS account ID used for the ECR registry')
+    string(name: 'AWS_CREDENTIALS_ID', defaultValue: '', description: 'Jenkins credentials ID containing AWS access key ID and secret access key')
   }
 
   environment {
@@ -54,6 +55,10 @@ pipeline {
 
           if (!params.AWS_ACCOUNT_ID?.trim()) {
             error("AWS_ACCOUNT_ID parameter is required. Set it in the Jenkins job before running the pipeline.")
+          }
+
+          if (!params.AWS_CREDENTIALS_ID?.trim()) {
+            error("AWS_CREDENTIALS_ID parameter is required. Set it to a Jenkins credential ID that contains AWS access keys.")
           }
         }
       }
@@ -98,26 +103,30 @@ pipeline {
         script {
           def imageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}"
 
-          if (isUnix()) {
-            sh """
-              aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-              docker build -t "${imageName}:$GIT_COMMIT" -f Dockerfile .
-              docker tag "${imageName}:$GIT_COMMIT" "${imageName}:latest"
-              docker push "${imageName}:$GIT_COMMIT"
-              docker push "${imageName}:latest"
-            """
-          } else {
-            bat """
-              @echo off
-              setlocal EnableExtensions EnableDelayedExpansion
-              set "IMAGE_NAME=${imageName}"
-              for /f "delims=" %%I in ('aws ecr get-login-password --region %AWS_REGION%') do set "ECR_PASSWORD=%%I"
-              echo !ECR_PASSWORD! | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.%AWS_REGION%.amazonaws.com
-              docker build -t !IMAGE_NAME!:%GIT_COMMIT% -f Dockerfile .
-              docker tag !IMAGE_NAME!:%GIT_COMMIT% !IMAGE_NAME!:latest
-              docker push !IMAGE_NAME!:%GIT_COMMIT%
-              docker push !IMAGE_NAME!:latest
-            """
+          withCredentials([usernamePassword(credentialsId: params.AWS_CREDENTIALS_ID, usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+            withEnv(["AWS_DEFAULT_REGION=${env.AWS_REGION}"]) {
+              if (isUnix()) {
+                sh """
+                  aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                  docker build -t "${imageName}:$GIT_COMMIT" -f Dockerfile .
+                  docker tag "${imageName}:$GIT_COMMIT" "${imageName}:latest"
+                  docker push "${imageName}:$GIT_COMMIT"
+                  docker push "${imageName}:latest"
+                """
+              } else {
+                bat """
+                  @echo off
+                  setlocal EnableExtensions EnableDelayedExpansion
+                  set "IMAGE_NAME=${imageName}"
+                  for /f "delims=" %%I in ('aws ecr get-login-password --region %AWS_REGION%') do set "ECR_PASSWORD=%%I"
+                  echo !ECR_PASSWORD! | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.%AWS_REGION%.amazonaws.com
+                  docker build -t !IMAGE_NAME!:%GIT_COMMIT% -f Dockerfile .
+                  docker tag !IMAGE_NAME!:%GIT_COMMIT% !IMAGE_NAME!:latest
+                  docker push !IMAGE_NAME!:%GIT_COMMIT%
+                  docker push !IMAGE_NAME!:latest
+                """
+              }
+            }
           }
         }
       }
@@ -126,21 +135,25 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         script {
-          if (isUnix()) {
-            sh """
-              aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
-              kubectl apply -k k8s/base
-              kubectl apply -f k8s/monitoring/prometheus.yaml
-              kubectl apply -f k8s/monitoring/grafana.yaml
-            """
-          } else {
-            bat """
-              @echo off
-              aws eks update-kubeconfig --region %AWS_REGION% --name %EKS_CLUSTER_NAME%
-              kubectl apply -k k8s/base
-              kubectl apply -f k8s/monitoring/prometheus.yaml
-              kubectl apply -f k8s/monitoring/grafana.yaml
-            """
+          withCredentials([usernamePassword(credentialsId: params.AWS_CREDENTIALS_ID, usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+            withEnv(["AWS_DEFAULT_REGION=${env.AWS_REGION}"]) {
+              if (isUnix()) {
+                sh """
+                  aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+                  kubectl apply -k k8s/base
+                  kubectl apply -f k8s/monitoring/prometheus.yaml
+                  kubectl apply -f k8s/monitoring/grafana.yaml
+                """
+              } else {
+                bat """
+                  @echo off
+                  aws eks update-kubeconfig --region %AWS_REGION% --name %EKS_CLUSTER_NAME%
+                  kubectl apply -k k8s/base
+                  kubectl apply -f k8s/monitoring/prometheus.yaml
+                  kubectl apply -f k8s/monitoring/grafana.yaml
+                """
+              }
+            }
           }
         }
       }
