@@ -107,6 +107,8 @@ pipeline {
             withEnv(["AWS_DEFAULT_REGION=${env.AWS_REGION}"]) {
               if (isUnix()) {
                 sh """
+                  aws sts get-caller-identity
+                  aws ecr describe-repositories --repository-names "${env.ECR_REPO_NAME}" --region "$AWS_REGION"
                   aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
                   docker build -t "${imageName}:$GIT_COMMIT" -f Dockerfile .
                   docker tag "${imageName}:$GIT_COMMIT" "${imageName}:latest"
@@ -114,16 +116,18 @@ pipeline {
                   docker push "${imageName}:latest"
                 """
               } else {
-                bat """
-                  @echo off
-                  setlocal EnableExtensions EnableDelayedExpansion
-                  set "IMAGE_NAME=${imageName}"
-                  for /f "delims=" %%I in ('aws ecr get-login-password --region %AWS_REGION%') do set "ECR_PASSWORD=%%I"
-                  echo !ECR_PASSWORD! | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.%AWS_REGION%.amazonaws.com
-                  docker build -t !IMAGE_NAME!:%GIT_COMMIT% -f Dockerfile .
-                  docker tag !IMAGE_NAME!:%GIT_COMMIT% !IMAGE_NAME!:latest
-                  docker push !IMAGE_NAME!:%GIT_COMMIT%
-                  docker push !IMAGE_NAME!:latest
+                powershell """
+                  \$ErrorActionPreference = 'Stop'
+                  \$registry = '${params.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com'
+                  aws sts get-caller-identity | Out-Host
+                  aws ecr describe-repositories --repository-names '${env.ECR_REPO_NAME}' --region '${env.AWS_REGION}' | Out-Host
+                  \$password = aws ecr get-login-password --region '${env.AWS_REGION}'
+                  if (-not \$password) { throw 'Failed to fetch ECR authorization token.' }
+                  \$password | docker login --username AWS --password-stdin \$registry
+                  docker build -t '${imageName}:$GIT_COMMIT' -f Dockerfile .
+                  docker tag '${imageName}:$GIT_COMMIT' '${imageName}:latest'
+                  docker push '${imageName}:$GIT_COMMIT'
+                  docker push '${imageName}:latest'
                 """
               }
             }
