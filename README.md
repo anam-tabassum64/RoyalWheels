@@ -790,6 +790,8 @@ kubectl get svc
 
 ## Jenkins Setup
 
+For the exact Jenkins credential and AWS IAM setup, see [docs/jenkins-aws-setup.md](C:/Users/Lenovo/Downloads/RoyalWheels/RoyalWheels/docs/jenkins-aws-setup.md).
+
 ### Step-by-Step Integration
 
 1. Create a Jenkins pipeline job.
