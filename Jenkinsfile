@@ -134,7 +134,10 @@ pipeline {
                   aws ecr describe-repositories --repository-names '${env.ECR_REPO_NAME}' --region '${env.AWS_REGION}' | Out-Host
                   \$password = aws ecr get-login-password --region '${env.AWS_REGION}'
                   if (-not \$password) { throw 'Failed to fetch ECR authorization token.' }
-                  \$password | docker login --username AWS --password-stdin \$registry
+                  \$utf8 = [System.Text.UTF8Encoding]::new(\$false)
+                  [Console]::OutputEncoding = \$utf8
+                  \$env:AWS_PAGER = ''
+                  \$password | & docker login --username AWS --password-stdin \$registry
                   docker build -t '${imageName}:$GIT_COMMIT' -f Dockerfile .
                   docker tag '${imageName}:$GIT_COMMIT' '${imageName}:latest'
                   docker push '${imageName}:$GIT_COMMIT'
