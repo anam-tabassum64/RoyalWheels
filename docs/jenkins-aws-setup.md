@@ -27,13 +27,13 @@ In the `RoyalWheels` job:
 2. Enable `This project is parameterized`.
 3. Add a `String Parameter`:
    - `Name`: `AWS_ACCOUNT_ID`
-   - `Default Value`: `148274106014`
+   - `Default Value`: leave blank unless you want an extra safety check
 4. Add another `String Parameter`:
    - `Name`: `AWS_CREDENTIALS_ID`
    - `Default Value`: `aws-jenkins-creds`
 5. Save the job.
 6. Click `Build with Parameters`.
-7. Confirm the same values and start the build.
+7. If you do set `AWS_ACCOUNT_ID`, make sure it matches the AWS account that owns the Jenkins credential.
 
 ## 3. Create or verify the ECR repository
 
@@ -98,6 +98,7 @@ If everything is wired correctly, the pipeline should show:
 - `aws ecr describe-repositories`
 - successful Docker login to ECR
 - image build and push
+- deployment of the exact pushed image tag
 
 ## 6. Common mistakes
 

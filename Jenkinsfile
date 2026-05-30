@@ -17,11 +17,19 @@ def requireWindowsTool(String toolName) {
   """
 }
 
+def resolveAwsAccountId() {
+  if (isUnix()) {
+    return sh(returnStdout: true, script: 'aws sts get-caller-identity --query Account --output text').trim()
+  }
+
+  return powershell(returnStdout: true, script: '$acct = aws sts get-caller-identity --query Account --output text; $acct.Trim()').trim()
+}
+
 pipeline {
   agent any
 
   parameters {
-    string(name: 'AWS_ACCOUNT_ID', defaultValue: '', description: 'AWS account ID used for the ECR registry')
+    string(name: 'AWS_ACCOUNT_ID', defaultValue: '', description: 'Optional AWS account ID check for the ECR registry')
     string(name: 'AWS_CREDENTIALS_ID', defaultValue: '', description: 'Jenkins credentials ID containing AWS access key ID and secret access key')
   }
 
@@ -51,10 +59,6 @@ pipeline {
             requireWindowsTool('aws')
             requireWindowsTool('kubectl')
             bat '@echo off && docker version'
-          }
-
-          if (!params.AWS_ACCOUNT_ID?.trim()) {
-            error("AWS_ACCOUNT_ID parameter is required. Set it in the Jenkins job before running the pipeline.")
           }
 
           if (!params.AWS_CREDENTIALS_ID?.trim()) {
@@ -101,15 +105,22 @@ pipeline {
     stage('Build and push Docker image') {
       steps {
         script {
-          def imageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}"
-
           withCredentials([usernamePassword(credentialsId: params.AWS_CREDENTIALS_ID, usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             withEnv(["AWS_DEFAULT_REGION=${env.AWS_REGION}"]) {
+              def resolvedAccountId = resolveAwsAccountId()
+              if (params.AWS_ACCOUNT_ID?.trim() && params.AWS_ACCOUNT_ID.trim() != resolvedAccountId) {
+                error("AWS_ACCOUNT_ID (${params.AWS_ACCOUNT_ID.trim()}) does not match the AWS account for the supplied Jenkins credential (${resolvedAccountId}). Update the parameter or use matching AWS credentials.")
+              }
+
+              env.AWS_ACCOUNT_ID = resolvedAccountId
+              def registry = "${resolvedAccountId}.dkr.ecr.${env.AWS_REGION}.amazonaws.com"
+              def imageName = "${registry}/${env.ECR_REPO_NAME}"
+
               if (isUnix()) {
                 sh """
                   aws sts get-caller-identity
                   aws ecr describe-repositories --repository-names "${env.ECR_REPO_NAME}" --region "$AWS_REGION"
-                  aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${params.AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                  aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${registry}"
                   docker build -t "${imageName}:$GIT_COMMIT" -f Dockerfile .
                   docker tag "${imageName}:$GIT_COMMIT" "${imageName}:latest"
                   docker push "${imageName}:$GIT_COMMIT"
@@ -118,7 +129,7 @@ pipeline {
               } else {
                 powershell """
                   \$ErrorActionPreference = 'Stop'
-                  \$registry = '${params.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com'
+                  \$registry = '${registry}'
                   aws sts get-caller-identity | Out-Host
                   aws ecr describe-repositories --repository-names '${env.ECR_REPO_NAME}' --region '${env.AWS_REGION}' | Out-Host
                   \$password = aws ecr get-login-password --region '${env.AWS_REGION}'
@@ -141,10 +152,15 @@ pipeline {
         script {
           withCredentials([usernamePassword(credentialsId: params.AWS_CREDENTIALS_ID, usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             withEnv(["AWS_DEFAULT_REGION=${env.AWS_REGION}"]) {
+              def resolvedAccountId = env.AWS_ACCOUNT_ID?.trim() ? env.AWS_ACCOUNT_ID.trim() : resolveAwsAccountId()
+              def imageName = "${resolvedAccountId}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}"
+
               if (isUnix()) {
                 sh """
                   aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
                   kubectl apply -k k8s/base
+                  kubectl set image deployment/royalwheels royalwheels="${imageName}:$GIT_COMMIT" -n royalwheels
+                  kubectl rollout status deployment/royalwheels -n royalwheels --timeout=180s
                   kubectl apply -f k8s/monitoring/prometheus.yaml
                   kubectl apply -f k8s/monitoring/grafana.yaml
                 """
@@ -153,6 +169,8 @@ pipeline {
                   @echo off
                   aws eks update-kubeconfig --region %AWS_REGION% --name %EKS_CLUSTER_NAME%
                   kubectl apply -k k8s/base
+                  kubectl set image deployment/royalwheels royalwheels="${imageName}:$GIT_COMMIT" -n royalwheels
+                  kubectl rollout status deployment/royalwheels -n royalwheels --timeout=180s
                   kubectl apply -f k8s/monitoring/prometheus.yaml
                   kubectl apply -f k8s/monitoring/grafana.yaml
                 """
