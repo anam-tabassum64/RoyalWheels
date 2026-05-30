@@ -127,21 +127,18 @@ pipeline {
                   docker push "${imageName}:latest"
                 """
               } else {
-                powershell """
-                  \$ErrorActionPreference = 'Stop'
-                  \$registry = '${registry}'
-                  aws sts get-caller-identity | Out-Host
-                  aws ecr describe-repositories --repository-names '${env.ECR_REPO_NAME}' --region '${env.AWS_REGION}' | Out-Host
-                  \$password = aws ecr get-login-password --region '${env.AWS_REGION}'
-                  if (-not \$password) { throw 'Failed to fetch ECR authorization token.' }
-                  \$utf8 = [System.Text.UTF8Encoding]::new(\$false)
-                  [Console]::OutputEncoding = \$utf8
-                  \$env:AWS_PAGER = ''
-                  \$password | & docker login --username AWS --password-stdin \$registry
-                  docker build -t '${imageName}:$GIT_COMMIT' -f Dockerfile .
-                  docker tag '${imageName}:$GIT_COMMIT' '${imageName}:latest'
-                  docker push '${imageName}:$GIT_COMMIT'
-                  docker push '${imageName}:latest'
+                bat """
+                  @echo off
+                  setlocal enabledelayedexpansion
+                  set AWS_PAGER=
+                  aws sts get-caller-identity
+                  aws ecr describe-repositories --repository-names "${env.ECR_REPO_NAME}" --region "${env.AWS_REGION}"
+                  aws ecr get-login-password --region "${env.AWS_REGION}" | docker login --username AWS --password-stdin "${registry}"
+                  if errorlevel 1 exit /b 1
+                  docker build -t "${imageName}:$GIT_COMMIT" -f Dockerfile .
+                  docker tag "${imageName}:$GIT_COMMIT" "${imageName}:latest"
+                  docker push "${imageName}:$GIT_COMMIT"
+                  docker push "${imageName}:latest"
                 """
               }
             }
